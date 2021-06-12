@@ -7,6 +7,7 @@ class SongsHandler {
 
         this.postSongHandler = this.postSongHandler.bind(this);
         this.getSongsHandler = this.getSongsHandler.bind(this);
+        this.getSongByIdHandler = this.getSongByIdHandler.bind(this);
     }
 
     async postSongHandler(request, h) {
@@ -58,14 +59,58 @@ class SongsHandler {
         }
     }
 
-    async getSongsHandler() {
-        const songs = await this._service.getSongs();
-        return {
-            status: 'success',
-            data: {
-                songs,
-            },
-        };
+    async getSongsHandler(request, h) {
+        try {
+            const songs = await this._service.getSongs();
+            return {
+                status: 'success',
+                data: {
+                    songs,
+                },
+            };
+        } catch (error) {
+            // Server ERROR!
+            const response = h.response({
+                status: 'error',
+                message: 'Maaf, terjadi kegagalan pada server kami.',
+            });
+            response.code(500);
+            console.error(error);
+            return response;
+        }
+    }
+
+    async getSongByIdHandler(request, h) {
+        try {
+            const { id } = request.params;
+
+            const song = await this._service.getSongById(id);
+
+            return {
+                status: 'success',
+                data: {
+                    song,
+                },
+            };
+        } catch (error) {
+            if (error instanceof ClientError) {
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statusCode);
+                return response;
+            }
+
+            // Server ERROR!
+            const response = h.response({
+                status: 'error',
+                message: 'Maaf, terjadi kegagalan pada server kami.',
+            });
+            response.code(500);
+            console.error(error);
+            return response;
+        }
     }
 }
 

@@ -42,6 +42,20 @@ class NotesService {
         const songs = await this._pool.query('SELECT * FROM songs');
         return songs.rows.map(mapDBToModel);
     }
+
+    async getSongById(id) {
+        const query = {
+            text: 'SELECT * FROM songs WHERE id = $1',
+            values: [id],
+        };
+        const song = await this._pool.query(query);
+
+        if (!song.rows.length) {
+            throw new NotFoundError('Lagu tidak ditemukan');
+        }
+
+        return song.rows.map(mapDBToModelDetail)[0];
+    }
 }
 
 module.exports = NotesService;

@@ -13,7 +13,7 @@ const mapDBToModelDetail = ({ id, title, year, performer, genre, duration, creat
     performer,
     genre,
     duration,
-    createdAt: created_at,
+    insertedAt: created_at,
     updatedAt: updated_at,
 });
 
