@@ -10,6 +10,10 @@
     "migrate": "node-pg-migrate"
   },
   "author": "Rizky Sam Pratama",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rizama/dicoding-open-music-api"
+  },
   "license": "ISC",
   "devDependencies": {
     "eslint": "^7.21.0",
