@@ -16,7 +16,7 @@ exports.up = (pgm) => {
             type: 'INTEGER',
             notNull: true,
         },
-        permormer: {
+        performer: {
             type: 'TEXT',
             notNull: true,
         },
