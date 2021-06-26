@@ -1,0 +1,4232 @@
+{
+	"info": {
+		"_postman_id": "5066d773-4d17-42d0-9630-9bee74cf1086",
+		"name": "OpenMusic API V2 Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Songs",
+			"item": [
+				{
+					"name": "Adding Song with Valid Payload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status response should be 201', () => {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body should contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body data should contains songId', () => {\r",
+									"    const { data } = pm.response.json();\r",
+									"\r",
+									"    pm.expect(data).to.haveOwnProperty('songId');\r",
+									"    pm.expect(data.songId).to.be.a('string');\r",
+									"    pm.expect(data.songId).to.not.equals('');\r",
+									"\r",
+									"    // memasukkan songId ke env variable.\r",
+									"    pm.environment.set('songId', data.songId);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"{{newTitle}}\",\r\n    \"year\": {{newYear}},\r\n    \"performer\": \"{{newPerformer}}\",\r\n    \"genre\": \"{{newGenre}}\",\r\n    \"duration\": \"{{newDuration}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adding Song with Bad Payload",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let badSongPayloads = pm.environment.get('badSongPayloads');\r",
+									"\r",
+									"if (!badSongPayloads || badSongPayloads.length === 0) {\r",
+									"    badSongPayloads = [\r",
+									"        {},\r",
+									"        { year: '1990', performer: 'Dicoding' },\r",
+									"        { title: true, year: '1990', performer: 'Dicoding' },\r",
+									"        { title: 'Song A', performer: 'Dicoding' },\r",
+									"        { title: 'Song A', year: null, performer: 'Dicoding' },\r",
+									"        { title: 'Song A', year: 1992 },\r",
+									"        { title: 'Song A', year: 1992, performer: false },\r",
+									"    ]\r",
+									"}\r",
+									"\r",
+									"const currentBadSongPayload = badSongPayloads.shift();\r",
+									"pm.environment.set('currentBadSongPayload', JSON.stringify(currentBadSongPayload));\r",
+									"pm.environment.set('badSongPayloads', badSongPayloads);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.message).to.not.equals(null);\r",
+									"});\r",
+									" \r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badSongPayloads = pm.environment.get('badSongPayloads');\r",
+									" \r",
+									"    if(badSongPayloads && badSongPayloads.length > 0) {\r",
+									"        postman.setNextRequest('Adding Song with Bad Payload');\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadSongPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Getting All Songs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body data should contains array songs and have only 1 item', () => {\r",
+									"    const { data } = pm.response.json();\r",
+									"\r",
+									"    pm.expect(data).to.haveOwnProperty('songs');\r",
+									"    pm.expect(data.songs).to.be.an('array');\r",
+									"    pm.expect(data.songs).lengthOf.at.least(1);\r",
+									"});\r",
+									"\r",
+									"pm.test('the array songs should contain object with only 3 property (id, title, performer)', () => {\r",
+									"    const { data: { songs } } = pm.response.json();\r",
+									"\r",
+									"    songs.forEach((song) => {\r",
+									"        pm.expect(Object.keys(song)).to.lengthOf(3);\r",
+									"\r",
+									"        pm.expect(song).to.haveOwnProperty('id');\r",
+									"        pm.expect(song).to.haveOwnProperty('title');\r",
+									"        pm.expect(song).to.haveOwnProperty('performer');\r",
+									"\r",
+									"        pm.expect(song.id).to.be.a('string');\r",
+									"        pm.expect(song.id).to.not.equals('');\r",
+									"        pm.expect(song.title).to.be.a('string');\r",
+									"        pm.expect(song.title).to.not.equals('');\r",
+									"        pm.expect(song.performer).to.be.a('string');\r",
+									"        pm.expect(song.performer).to.not.equals('');\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Getting Specified Song",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body data shoud contains song object', () => {\r",
+									"    const { data } = pm.response.json();\r",
+									"\r",
+									"    pm.expect(data).to.haveOwnProperty('song');\r",
+									"    pm.expect(data.song).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('song object should contains correct value', () => {\r",
+									"    const { data: { song } } = pm.response.json();\r",
+									"\r",
+									"    pm.expect(song).to.haveOwnProperty('id');\r",
+									"    pm.expect(song).to.haveOwnProperty('title');\r",
+									"    pm.expect(song).to.haveOwnProperty('year');\r",
+									"    pm.expect(song).to.haveOwnProperty('performer');\r",
+									"    pm.expect(song).to.haveOwnProperty('genre');\r",
+									"    pm.expect(song).to.haveOwnProperty('duration');\r",
+									"    pm.expect(song).to.haveOwnProperty('insertedAt');\r",
+									"    pm.expect(song).to.haveOwnProperty('updatedAt');\r",
+									"\r",
+									"    pm.expect(song.id).to.equals(pm.environment.get('songId'));\r",
+									"    pm.expect(song.title).to.equals(pm.environment.get('newTitle'));\r",
+									"    pm.expect(song.year).to.equals(Number(pm.environment.get('newYear')));\r",
+									"    pm.expect(song.performer).to.equals(pm.environment.get('newPerformer'));\r",
+									"    pm.expect(song.genre).to.equals(pm.environment.get('newGenre'));\r",
+									"    pm.expect(song.duration).to.equals(Number(pm.environment.get('newDuration')));\r",
+									"    pm.expect(song.insertedAt).to.be.a('string');\r",
+									"    pm.expect(song.insertedAt).to.not.equals('');\r",
+									"    pm.expect(song.updatedAt).to.be.a('string');\r",
+									"    pm.expect(song.updatedAt).to.not.equals('');\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/{{songId}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"{{songId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Getting Specified Song with Bad songId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should 404', () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/xxxx",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"xxxx"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Song with Valid Payload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status should be 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});\r",
+									"\r",
+									"pm.test('when requesting the updated song', () => {\r",
+									"    const host = pm.environment.get('host');\r",
+									"    const port = pm.environment.get('port');\r",
+									"    const songId = pm.environment.get('songId');\r",
+									"\r",
+									"    pm.sendRequest(`http://${host}:${port}/songs/${songId}`, (error, response) => {\r",
+									"        if (!error) {\r",
+									"            pm.test('the song should be updated', () => {\r",
+									"                pm.expect(response.code).to.equals(200);\r",
+									"                const { data: { song } } = response.json();\r",
+									"\r",
+									"                pm.expect(song.title).to.equals(pm.environment.get('updateTitle'));\r",
+									"                pm.expect(song.year).to.equals(Number(pm.environment.get('updateYear')));\r",
+									"                pm.expect(song.performer).to.equals(pm.environment.get('updatePerformer'));\r",
+									"                pm.expect(song.genre).to.equals(pm.environment.get('updateGenre'));\r",
+									"                pm.expect(song.duration).to.equals(Number(pm.environment.get('updateDuration')));\r",
+									"            });\r",
+									"        }\r",
+									"    });\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"{{updateTitle}}\",\r\n    \"year\": \"{{updateYear}}\",\r\n    \"performer\": \"{{updatePerformer}}\",\r\n    \"genre\": \"{{updateGenre}}\",\r\n    \"duration\": \"{{updateDuration}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/{{songId}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"{{songId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Song with Bad Payload",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let badSongPayloads = pm.environment.get('badSongPayloads');\r",
+									"\r",
+									"if (!badSongPayloads || badSongPayloads.length === 0) {\r",
+									"    badSongPayloads = [\r",
+									"        {},\r",
+									"        { year: '1990', performer: 'Dicoding' },\r",
+									"        { title: true, year: '1990', performer: 'Dicoding' },\r",
+									"        { title: 'Song A', performer: 'Dicoding' },\r",
+									"        { title: 'Song A', year: null, performer: 'Dicoding' },\r",
+									"        { title: 'Song A', year: 1992 },\r",
+									"        { title: 'Song A', year: 1992, performer: false },\r",
+									"    ]\r",
+									"}\r",
+									"\r",
+									"const currentBadSongPayload = badSongPayloads.shift();\r",
+									"pm.environment.set('currentBadSongPayload', JSON.stringify(currentBadSongPayload));\r",
+									"pm.environment.set('badSongPayloads', badSongPayloads);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.message).to.not.equals(null);\r",
+									"});\r",
+									" \r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badSongPayloads = pm.environment.get('badSongPayloads');\r",
+									" \r",
+									"    if(badSongPayloads && badSongPayloads.length > 0) {\r",
+									"        postman.setNextRequest('Update Song with Bad Payload');\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadSongPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/{{songId}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"{{songId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Song with Bad songId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should 404', () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"{{updateTitle}}\",\r\n    \"year\": \"{{updateYear}}\",\r\n    \"performer\": \"{{updatePerformer}}\",\r\n    \"genre\": \"{{updateGenre}}\",\r\n    \"duration\": \"{{updateDuration}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/xxxx",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"xxxx"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Song with Bad songId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should 404', () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/xxxx",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"xxxx"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Song with Valid Payload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status should be 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body shoud contains correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});\r",
+									"\r",
+									"pm.test('when requesting the deleted songs', () => {\r",
+									"    const host = pm.environment.get('host');\r",
+									"    const port = pm.environment.get('port');\r",
+									"    const songId = pm.environment.get('songId');\r",
+									"\r",
+									"    pm.sendRequest(`http://${host}:${port}/songs/${songId}`, (error, response) => {\r",
+									"        if (!error) {\r",
+									"            pm.test('the song should be updated', () => {\r",
+									"                pm.expect(response.code).to.equals(404);\r",
+									"            });\r",
+									"        }\r",
+									"    });\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}:{{port}}/songs/{{songId}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"songs",
+								"{{songId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Add Users with Valid Payload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 201', () => {\r",
+									"   pm.response.to.have.status(201);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type should application/json', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('status');\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson).to.ownProperty('data');\r",
+									"\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body data should have userId property and not equal to empty', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    const { data } = responseJson;\r",
+									" \r",
+									"    pm.expect(data).to.ownProperty('userId');\r",
+									"    pm.expect(data.noteId).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{newUsername}}-{{$timestamp}}\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"fullname\": \"{{newFullname}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/users",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add User with Exists Username",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const postRequest = {\r",
+									"    url: 'http://localhost:5000/users',\r",
+									"    method: 'POST',\r",
+									"    header: {\r",
+									"        'Content-Type': 'application/json',\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify({\r",
+									"            username: pm.environment.get('newUsername'),\r",
+									"            password: pm.environment.get('newPassword'),\r",
+									"            fullname: pm.environment.get('newFullname')\r",
+									"        }),\r",
+									"    },\r",
+									"};\r",
+									"\r",
+									"pm.sendRequest(postRequest, (error, response) => {\r",
+									"    console.log(error ? error : response.json());\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.message).to.not.equals(null);\r",
+									"});\r",
+									" \r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badUserPayloads = pm.environment.get('badUserPayloads');\r",
+									" \r",
+									"    if(badUserPayloads && badUserPayloads.length > 0) {\r",
+									"        postman.setNextRequest('Add User with Bad Payload');\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{newUsername}}\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"fullname\": \"{{newFullname}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/users",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add User with Bad Payload",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let badUserPayloads = pm.environment.get('badUserPayloads');\r",
+									"\r",
+									"if(!badUserPayloads || badUserPayloads.length < 1) {\r",
+									"    badUserPayloads = [\r",
+									"        {},\r",
+									"        { password: 'secret', fullname: 'user A' },\r",
+									"        { username: true, password: 'secret', fullname: 'user A' },\r",
+									"        { username: 'userA', fullname: 'user A' },\r",
+									"        { username: 'userA', password: 1, fullname: 'user A' },\r",
+									"        { username: 'userA', password: 'secret' },\r",
+									"        { username: 'userA', password: 'secret', fullname: true },\r",
+									"    ]\r",
+									"}\r",
+									"\r",
+									"const currentBadUserPayload = badUserPayloads.shift();\r",
+									"pm.environment.set('currentBadUserPayload', JSON.stringify(currentBadUserPayload));\r",
+									"pm.environment.set('badUserPayloads', badUserPayloads);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.message).to.not.equals(null);\r",
+									"});\r",
+									" \r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badUserPayloads = pm.environment.get('badUserPayloads');\r",
+									" \r",
+									"    if(badUserPayloads && badUserPayloads.length > 0) {\r",
+									"        postman.setNextRequest('Add User with Bad Payload');\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadUserPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/users",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentications",
+			"item": [
+				{
+					"name": "Post Authentications with Valid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 201', () => {\r",
+									"   pm.response.to.have.status(201);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('status');\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson).to.ownProperty('data');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body data should have property accessToken and refreshToken with correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    const { data } = responseJson;\r",
+									" \r",
+									"    pm.expect(data).to.have.ownProperty('accessToken');\r",
+									"    pm.expect(data.accessToken).to.not.equals('');\r",
+									"    pm.expect(data.accessToken).to.not.equals(null);\r",
+									"    pm.expect(data).to.have.ownProperty('refreshToken');\r",
+									"    pm.expect(data.refreshToken).to.not.equals('');\r",
+									"    pm.expect(data.refreshToken).to.not.equals(null);\r",
+									" \r",
+									" \r",
+									"    // put refreshToken to env variable\r",
+									"    pm.environment.set('refreshToken', data.refreshToken);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{newUsername}}\",\r\n    \"password\": \"{{newPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Authentications with Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 401', () => {\r",
+									"   pm.response.to.have.status(401);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('status');\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{newUsername}}\",\r\n    \"password\": \"xxxxx\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Authentications with Bad Payload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 400', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('status');\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});\r",
+									"\r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badAuthPayloads = pm.environment.get('badAuthPayloads');\r",
+									" \r",
+									"    if(badAuthPayloads && badAuthPayloads.length > 0) {\r",
+									"        postman.setNextRequest('Post Authentications with Bad Payload');\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let badAuthPayloads = pm.environment.get('badAuthPayloads');\r",
+									"\r",
+									"if(!badAuthPayloads || badAuthPayloads.length < 1) {\r",
+									"    badAuthPayloads = [\r",
+									"        {},\r",
+									"        { password: 'secret' },\r",
+									"        { username: true, password: 'secret' },\r",
+									"        { username: 'userA' },\r",
+									"        { username: 'userA', password: true }\r",
+									"    ]\r",
+									"}\r",
+									"\r",
+									"const currentBadAuthPayload = badAuthPayloads.shift();\r",
+									"pm.environment.set('currentBadAuthPayload', JSON.stringify(currentBadAuthPayload));\r",
+									"pm.environment.set('badAuthPayloads', badAuthPayloads);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadAuthPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Authentications with Valid Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test('response body should have correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body data should contain accessToken', () => {\r",
+									"    const { data } = pm.response.json();\r",
+									"\r",
+									"    pm.expect(data).to.haveOwnProperty('accessToken');\r",
+									"    pm.expect(data.accessToken).to.be.a('string');\r",
+									"    pm.expect(data.accessToken).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"{{refreshToken}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Authentications with Invalid Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 400', () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test('response body should have correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"xxx.xxx.xxx\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Authentications with Valid Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test('response body should have correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('success');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"{{refreshToken}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Authentications with Invalid Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should be 400', () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test('response body should have correct value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"\r",
+									"    pm.expect(responseJson.status).to.equals('fail');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"xxx.xxx.xxx\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/authentications",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"authentications"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"const postRequest = {",
+							"    url: 'http://localhost:5000/users',",
+							"    method: 'POST',",
+							"    header: {",
+							"    'Content-Type': 'application/json',",
+							"    },",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({",
+							"            username: pm.environment.get('newUsername'),",
+							"            password: pm.environment.get('newPassword'),",
+							"            fullname: pm.environment.get('newFullname')",
+							"        }),",
+							"    },",
+							"};",
+							" ",
+							"pm.sendRequest(postRequest, (error, response) => {",
+							"    console.log(error ? error : response.json());",
+							"});"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Playlists (Authorizations)",
+			"item": [
+				{
+					"name": "[No Test] Prerequiresite",
+					"item": [
+						{
+							"name": "[No Test] Add Song for Playlist",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data: jsonData } = pm.response.json();\r",
+											"\r",
+											"if (jsonData) {\r",
+											"    const { songId } = jsonData;\r",
+											"    pm.environment.set('songIdToPlaylist', songId);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"{{newTitle}}\",\r\n    \"year\": {{newYear}},\r\n    \"performer\": \"{{newPerformer}}\",\r\n    \"genre\": \"{{newGenre}}\",\r\n    \"duration\": \"{{newDuration}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] Add Users A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userAUsername}}\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"fullname\": \"{{newFullname}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/users",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] Add Users B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userBUsername}}\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"fullname\": \"{{newFullname}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/users",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] User A Post Authentication",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data:  jsonData } = pm.response.json();\r",
+											"\r",
+											"if (jsonData) {\r",
+											"    const { accessToken } = jsonData;\r",
+											"    pm.environment.set('userAToken', accessToken);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userAUsername}}\",\r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/authentications",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"authentications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] User B Post Authentication",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data:  jsonData } = pm.response.json();\r",
+											"\r",
+											"if (jsonData) {\r",
+											"    const { accessToken } = jsonData;\r",
+											"    pm.environment.set('userBToken', accessToken);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userBUsername}}\",\r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/authentications",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"authentications"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Adding Playlist",
+					"item": [
+						{
+							"name": "Add Playlist without Authorizations",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 401', () => {\r",
+											"    pm.response.to.have.status(401);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); "
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"{{newPlaylistName}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Playlist using User A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should have playlistId', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlistId');\r",
+											"    pm.expect(data.playlistId).to.be.a('string');\r",
+											"    pm.expect(data.playlistId).to.not.equals('');\r",
+											"\r",
+											"    // save playlistId to env variable\r",
+											"    pm.environment.set('userAPlaylistId', data.playlistId);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userAToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"{{newPlaylistName}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should have playlistId', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlistId');\r",
+											"    pm.expect(data.playlistId).to.be.a('string');\r",
+											"    pm.expect(data.playlistId).to.not.equals('');\r",
+											"\r",
+											"    // save playlistId to env variable\r",
+											"    pm.environment.set('userBPlaylistId', data.playlistId);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"{{newPlaylistName}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Getting Playlist",
+					"item": [
+						{
+							"name": "Get All Playlist using User A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type should application/json', () => {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body shoud contains correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains array playlists with length 1', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlists');\r",
+											"    pm.expect(data.playlists).to.be.an('array');\r",
+											"    pm.expect(data.playlists).to.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test('the playlists should be contains playlist object which have 3 property (id, name, username)', () => {\r",
+											"    const { data: { playlists } } = pm.response.json();\r",
+											"\r",
+											"    playlists.forEach((playlist) => {\r",
+											"        pm.expect(playlist).to.be.an('object');\r",
+											"        pm.expect(Object.keys(playlist)).to.lengthOf(3);\r",
+											"\r",
+											"        pm.expect(playlist).to.haveOwnProperty('id');\r",
+											"        pm.expect(playlist).to.haveOwnProperty('name');\r",
+											"        pm.expect(playlist).to.haveOwnProperty('username');\r",
+											"\r",
+											"        pm.expect(playlist.id).to.be.a('string');\r",
+											"        pm.expect(playlist.id).to.not.equals('');\r",
+											"        pm.expect(playlist.name).to.equals(pm.environment.get('newPlaylistName'));\r",
+											"        pm.expect(playlist.username).to.equals(pm.environment.get('userAUsername'));\r",
+											"    });\r",
+											"})\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userAToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type should application/json', () => {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body shoud contains correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains array playlists with length 1', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlists');\r",
+											"    pm.expect(data.playlists).to.be.an('array');\r",
+											"    pm.expect(data.playlists).to.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test('the playlists should be contains playlist object which have 3 property (id, name, username)', () => {\r",
+											"    const { data: { playlists } } = pm.response.json();\r",
+											"\r",
+											"    playlists.forEach((playlist) => {\r",
+											"        pm.expect(playlist).to.be.an('object');\r",
+											"        pm.expect(Object.keys(playlist)).to.lengthOf(3);\r",
+											"\r",
+											"        pm.expect(playlist).to.haveOwnProperty('id');\r",
+											"        pm.expect(playlist).to.haveOwnProperty('name');\r",
+											"        pm.expect(playlist).to.haveOwnProperty('username');\r",
+											"\r",
+											"        pm.expect(playlist.id).to.be.a('string');\r",
+											"        pm.expect(playlist.id).to.not.equals('');\r",
+											"        pm.expect(playlist.name).to.equals(pm.environment.get('newPlaylistName'));\r",
+											"        pm.expect(playlist.username).to.equals(pm.environment.get('userBUsername'));\r",
+											"    });\r",
+											"})\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Adding Songs to Playlist",
+					"item": [
+						{
+							"name": "Add Song to User A Playlist using User A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userAToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Song to User B Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userBPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userBPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Song to User A Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Getting Songs in Playlist",
+					"item": [
+						{
+							"name": "Get All Songs from User A Playlist using User A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains songs array with length 1', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('songs');\r",
+											"    pm.expect(data.songs).to.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test('the array songs should contain object with only 3 property (id, title, performer)', () => {\r",
+											"    const { data: { songs } } = pm.response.json();\r",
+											"\r",
+											"    songs.forEach((song) => {\r",
+											"        pm.expect(Object.keys(song)).to.lengthOf(3);\r",
+											"\r",
+											"        pm.expect(song).to.haveOwnProperty('id');\r",
+											"        pm.expect(song).to.haveOwnProperty('title');\r",
+											"        pm.expect(song).to.haveOwnProperty('performer');\r",
+											"\r",
+											"        pm.expect(song.id).to.be.a('string');\r",
+											"        pm.expect(song.id).to.not.equals('');\r",
+											"        pm.expect(song.title).to.be.a('string');\r",
+											"        pm.expect(song.title).to.not.equals('');\r",
+											"        pm.expect(song.performer).to.be.a('string');\r",
+											"        pm.expect(song.performer).to.not.equals('');\r",
+											"    });\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userAToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Songs from User B Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains songs array with length 1', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('songs');\r",
+											"    pm.expect(data.songs).to.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test('the array songs should contain object with only 3 property (id, title, performer)', () => {\r",
+											"    const { data: { songs } } = pm.response.json();\r",
+											"\r",
+											"    songs.forEach((song) => {\r",
+											"        pm.expect(Object.keys(song)).to.lengthOf(3);\r",
+											"\r",
+											"        pm.expect(song).to.haveOwnProperty('id');\r",
+											"        pm.expect(song).to.haveOwnProperty('title');\r",
+											"        pm.expect(song).to.haveOwnProperty('performer');\r",
+											"\r",
+											"        pm.expect(song.id).to.be.a('string');\r",
+											"        pm.expect(song.id).to.not.equals('');\r",
+											"        pm.expect(song.title).to.be.a('string');\r",
+											"        pm.expect(song.title).to.not.equals('');\r",
+											"        pm.expect(song.performer).to.be.a('string');\r",
+											"        pm.expect(song.performer).to.not.equals('');\r",
+											"    });\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userBPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userBPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Songs from User A Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Delete Song from Playlist",
+					"item": [
+						{
+							"name": "Delete Song from User A Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Song from User A Playlist using User A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userAToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Song from User B Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userBPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userBPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Song from Playlist using Invalid SongId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 400', () => {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"xxxxxx\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userBPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userBPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Delete Playlist",
+					"item": [
+						{
+							"name": "Delete User A Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User A Playlist using User A",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userAToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userAPlaylistId}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userAPlaylistId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User B Playlist using User B",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userBToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userBPlaylistId}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userBPlaylistId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "[Optional] Collaborations",
+			"item": [
+				{
+					"name": "[No Test] Prerequiresite",
+					"item": [
+						{
+							"name": "[No Test] Add Song for Playlist",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data: jsonData } = pm.response.json();\r",
+											"\r",
+											"if (jsonData) {\r",
+											"    const { songId } = jsonData;\r",
+											"    pm.environment.set('songIdToPlaylist', songId);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"{{newTitle}}\",\r\n    \"year\": {{newYear}},\r\n    \"performer\": \"{{newPerformer}}\",\r\n    \"genre\": \"{{newGenre}}\",\r\n    \"duration\": \"{{newDuration}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] Add Users X",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userXUsername}}\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"fullname\": \"{{userXFullname}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/users",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] Add Users Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data: jsonData } = pm.response.json();\r",
+											"if (jsonData) {\r",
+											"    const { userId } = jsonData;\r",
+											"    pm.environment.set('userYUserId', userId);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userYUsername}}\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"fullname\": \"{{userYFullname}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/users",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] User X Post Authentication",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data:  jsonData } = pm.response.json();\r",
+											"\r",
+											"if (jsonData) {\r",
+											"    const { accessToken } = jsonData;\r",
+											"    pm.environment.set('userXToken', accessToken);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userXUsername}}\",\r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/authentications",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"authentications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[No Test] User Y Post Authentication",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const { data:  jsonData } = pm.response.json();\r",
+											"\r",
+											"if (jsonData) {\r",
+											"    const { accessToken } = jsonData;\r",
+											"    pm.environment.set('userYToken', accessToken);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{userYUsername}}\",\r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/authentications",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"authentications"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "[Optional] Collaborator Scenario",
+					"item": [
+						{
+							"name": "[Optional] Create Playlist Using User X",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should have playlistId', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlistId');\r",
+											"    pm.expect(data.playlistId).to.be.a('string');\r",
+											"    pm.expect(data.playlistId).to.not.equals('');\r",
+											"\r",
+											"    // save playlistId to env variable\r",
+											"    pm.environment.set('userXPlaylistId', data.playlistId);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userXToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\" : \"{{newPlaylistName}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Add User Y as Collaborator in User X Playlist using User X",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userXToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"playlistId\": \"{{userXPlaylistId}}\",\r\n    \"userId\": \"{{userYUserId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/collaborations",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"collaborations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Get All Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type should application/json', () => {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body shoud contains correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains array playlists with length 1', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlists');\r",
+											"    pm.expect(data.playlists).to.be.an('array');\r",
+											"    pm.expect(data.playlists).to.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test('the playlists should be contains playlist object which have 3 property (id, name, username)', () => {\r",
+											"    const { data: { playlists } } = pm.response.json();\r",
+											"\r",
+											"    playlists.forEach((playlist) => {\r",
+											"        pm.expect(playlist).to.be.an('object');\r",
+											"        pm.expect(Object.keys(playlist)).to.lengthOf(3);\r",
+											"\r",
+											"        pm.expect(playlist).to.haveOwnProperty('id');\r",
+											"        pm.expect(playlist).to.haveOwnProperty('name');\r",
+											"        pm.expect(playlist).to.haveOwnProperty('username');\r",
+											"\r",
+											"        pm.expect(playlist.id).to.be.a('string');\r",
+											"        pm.expect(playlist.id).to.not.equals('');\r",
+											"        pm.expect(playlist.name).to.equals(pm.environment.get('newPlaylistName'));\r",
+											"        pm.expect(playlist.username).to.equals(pm.environment.get('userXUsername'));\r",
+											"    });\r",
+											"})\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Add Songs to User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 201', () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const songIdToPlaylist = pm.environment.get('songIdToPlaylist');\r",
+											"\r",
+											"const addSongToPlaylistRequest = {\r",
+											"    url: `http://${pm.environment.get('host')}:${pm.environment.get('port')}/songs`,\r",
+											"    method: 'POST',\r",
+											"    header: {\r",
+											"        'Content-Type': 'application/json',\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: 'raw',\r",
+											"        raw: JSON.stringify({\r",
+											"            title: pm.environment.get('newTitle'),\r",
+											"            year: pm.environment.get('newYear'),\r",
+											"            performer: pm.environment.get('newPerformer'),\r",
+											"            genre: pm.environment.get('newGenre'),\r",
+											"            duration: pm.environment.get('newDuration'),\r",
+											"        }),\r",
+											"    }\r",
+											"}\r",
+											"\r",
+											"pm.sendRequest(addSongToPlaylistRequest, (error, response) => {\r",
+											"    if (!error) {\r",
+											"        const { data } = response.json();\r",
+											"\r",
+											"        if (data) {\r",
+											"            const { songId } = data;\r",
+											"            pm.environment.set('songIdToPlaylist', songId);\r",
+											"        }\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Get Songs from User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains songs array with length 1', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('songs');\r",
+											"    pm.expect(data.songs).to.lengthOf(1);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Delete Songs to User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Delete User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Remove User Y as Collaborator in User X Playlist using User X",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userXToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"playlistId\": \"{{userXPlaylistId}}\",\r\n    \"userId\": \"{{userYUserId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/collaborations",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"collaborations"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "[Optional] Pasca-Collaborator Scenario",
+					"item": [
+						{
+							"name": "[Optional] Get Songs from User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Add User Y as Collaborator in User X Playlist Using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"playlistId\": \"{{userXPlaylistId}}\",\r\n    \"userId\": \"{{userYUserId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/collaborations",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"collaborations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Get All Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should 200', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type should application/json', () => {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body shoud contains correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('success');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test('response body data should contains array playlists with length 0', () => {\r",
+											"    const { data } = pm.response.json();\r",
+											"\r",
+											"    pm.expect(data).to.haveOwnProperty('playlists');\r",
+											"    pm.expect(data.playlists).to.be.an('array');\r",
+											"    pm.expect(data.playlists).to.lengthOf(0);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Add Songs to User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "[Optional] Delete Songs to User X Playlist using User Y",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should be 403', () => {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+											"}); \r",
+											"\r",
+											"pm.test('response body should have correct value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+											"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+											"\r",
+											"    pm.expect(responseJson.status).to.equals('fail');\r",
+											"    pm.expect(responseJson.message).to.be.a('string');\r",
+											"    pm.expect(responseJson.message).to.not.equals('');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userYToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"songId\": \"{{songIdToPlaylist}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/playlists/{{userXPlaylistId}}/songs",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"playlists",
+										"{{userXPlaylistId}}",
+										"songs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}
