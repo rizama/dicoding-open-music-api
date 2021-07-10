@@ -1,5 +1,3 @@
-const { errorHandler } = require('../../utils');
-
 class AuthenticationsHandler {
     constructor(authenticationsService, usersService, tokenManager, validator) {
         this._authenticationsService = authenticationsService;
@@ -7,9 +5,12 @@ class AuthenticationsHandler {
         this._tokenManager = tokenManager;
         this._validator = validator;
 
-        this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
-        this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
-        this.deleteAuthenticationHandler = this.deleteAuthenticationHandler.bind(this);
+        this.postAuthenticationHandler =
+            this.postAuthenticationHandler.bind(this);
+        this.putAuthenticationHandler =
+            this.putAuthenticationHandler.bind(this);
+        this.deleteAuthenticationHandler =
+            this.deleteAuthenticationHandler.bind(this);
     }
 
     async postAuthenticationHandler(request, h) {
@@ -40,11 +41,11 @@ class AuthenticationsHandler {
             response.code(201);
             return response;
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async putAuthenticationHandler(request, h) {
+    async putAuthenticationHandler(request) {
         try {
             this._validator.validatePutAuthenticationPayload(request.payload);
 
@@ -63,11 +64,11 @@ class AuthenticationsHandler {
                 },
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async deleteAuthenticationHandler(request, h) {
+    async deleteAuthenticationHandler(request) {
         try {
             this._validator.validateDeleteAuthenticationPayload(
                 request.payload
@@ -83,7 +84,7 @@ class AuthenticationsHandler {
                 message: 'Refresh token berhasil dihapus',
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 }

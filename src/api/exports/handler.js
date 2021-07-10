@@ -1,5 +1,3 @@
-const { errorHandler } = require('../../utils');
-
 class ExportsHandler {
     constructor(service, validator, playlistsService) {
         this._service = service;
@@ -37,7 +35,7 @@ class ExportsHandler {
             response.code(201);
             return response;
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 }

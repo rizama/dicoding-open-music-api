@@ -1,5 +1,3 @@
-const { errorHandler } = require('../../utils');
-
 class SongsHandler {
     constructor(service, validator) {
         this._service = service;
@@ -41,11 +39,11 @@ class SongsHandler {
             response.code(201);
             return response;
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async getSongsHandler(request, h) {
+    async getSongsHandler() {
         try {
             const songs = await this._service.getSongs();
             return {
@@ -55,11 +53,11 @@ class SongsHandler {
                 },
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async getSongByIdHandler(request, h) {
+    async getSongByIdHandler(request) {
         try {
             const { id } = request.params;
 
@@ -72,11 +70,11 @@ class SongsHandler {
                 },
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async putSongByIdHandler(request, h) {
+    async putSongByIdHandler(request) {
         try {
             this._validator.validateSongPayload(request.payload);
             const { id } = request.params;
@@ -88,11 +86,11 @@ class SongsHandler {
                 message: 'Lagu berhasil diperbarui',
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async deleteSongByIdHandler(request, h) {
+    async deleteSongByIdHandler(request) {
         try {
             const { id } = request.params;
             await this._service.deleteSongById(id);
@@ -101,7 +99,7 @@ class SongsHandler {
                 message: 'Lagu berhasil dihapus',
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 }

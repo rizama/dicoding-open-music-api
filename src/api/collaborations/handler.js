@@ -1,5 +1,3 @@
-const { errorHandler } = require('../../utils');
-
 class CollaborationsHandler {
     constructor(collaborationsService, playlistsService, validator) {
         this._collaborationsService = collaborationsService;
@@ -34,11 +32,11 @@ class CollaborationsHandler {
             response.code(201);
             return response;
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async deleteCollaborationHandler(request, h) {
+    async deleteCollaborationHandler(request) {
         try {
             this._validator.validateCollaborationPayload(request.payload);
             const { id: credentialId } = request.auth.credentials;
@@ -56,7 +54,7 @@ class CollaborationsHandler {
             };
         } catch (error) {
             console.log(error);
-            return errorHandler(error, h);
+            return error;
         }
     }
 }

@@ -1,5 +1,3 @@
-const { errorHandler } = require('../../utils');
-
 class PlaylistHandler {
     constructor(service, validator) {
         this._service = service;
@@ -33,11 +31,11 @@ class PlaylistHandler {
             response.code(201);
             return response;
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async getPlaylistHandler(request, h) {
+    async getPlaylistHandler(request) {
         try {
             const { id: credentialId } = request.auth.credentials;
             const playlists = await this._service.getPlaylists(credentialId);
@@ -49,11 +47,11 @@ class PlaylistHandler {
             };
         } catch (error) {
             console.log(error);
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async deletePlaylistHandler(request, h) {
+    async deletePlaylistHandler(request) {
         try {
             const { playlistId } = request.params;
             const { id: credentialId } = request.auth.credentials;
@@ -66,7 +64,7 @@ class PlaylistHandler {
                 message: 'Playlist berhasil dihapus',
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
@@ -86,11 +84,11 @@ class PlaylistHandler {
             response.code(201);
             return response;
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async getSongFromPlaylistHandler(request, h) {
+    async getSongFromPlaylistHandler(request) {
         try {
             const { playlistId } = request.params;
             const { id: credentialId } = request.auth.credentials;
@@ -106,11 +104,11 @@ class PlaylistHandler {
                 },
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 
-    async deleteSongFromPlaylistHandler(request, h) {
+    async deleteSongFromPlaylistHandler(request) {
         try {
             const { playlistId } = request.params;
             const { songId } = request.payload;
@@ -124,7 +122,7 @@ class PlaylistHandler {
                 message: 'Lagu berhasil dihapus dari playlist',
             };
         } catch (error) {
-            return errorHandler(error, h);
+            return error;
         }
     }
 }
