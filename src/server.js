@@ -3,6 +3,8 @@ const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const Inert = require('@hapi/inert');
 
+const ClientError = require('./exceptions/ClientError');
+
 const songs = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
 const SongsValidator = require('./validator/songs');
@@ -40,7 +42,10 @@ const init = async () => {
     const usersService = new UsersService();
     const authenticationsService = new AuthenticationsService();
     const collaborationsService = new CollaborationsService(cacheService);
-    const playlistsService = new PlaylistsService(collaborationsService, cacheService);
+    const playlistsService = new PlaylistsService(
+        collaborationsService,
+        cacheService
+    );
     const storagesService = new StorageService();
 
     const server = Hapi.server({
@@ -78,6 +83,33 @@ const init = async () => {
                 id: artifacts.decoded.payload.id,
             },
         }),
+    });
+
+    server.ext('onPreResponse', (request, h) => {
+        // mendapat konteks response dari request
+        const { response } = request;
+
+        if (response instanceof ClientError) {
+            const newResponse = h.response({
+                status: 'fail',
+                message: response.message,
+            });
+            newResponse.code(response.statusCode);
+            return newResponse;
+        }
+
+        // Server ERROR!
+        if (response instanceof Error) {
+            const newResponse = h.response({
+                status: 'error',
+                message: response.output.payload.message,
+            });
+            newResponse.code(response.output.statusCode);
+            return newResponse;
+        }
+
+        // jika bukan ClientError, lanjutkan dengan response sebelumnya (tanpa terintervensi)
+        return response.continue || response;
     });
 
     await server.register([
@@ -124,7 +156,7 @@ const init = async () => {
             options: {
                 service: ProducerService,
                 validator: ExportsValidator,
-                playlistsService
+                playlistsService,
             },
         },
         {
