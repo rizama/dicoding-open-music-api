@@ -12,11 +12,10 @@ class AlbumsService {
     async addAlbum({ name, year }) {
         const id = `album-${nanoid(16)}`;
         const insertedAt = new Date().toISOString();
-        const updatedAt = insertedAt;
 
         const query = {
-            text: 'INSERT INTO albums VALUES($1, $2, $3, $4, $5) RETURNING id',
-            values: [id, name, year, insertedAt, updatedAt],
+            text: 'INSERT INTO albums VALUES($1, $2, $3, $4, $4) RETURNING id',
+            values: [id, name, year, insertedAt],
         };
 
         const result = await this._pool.query(query);

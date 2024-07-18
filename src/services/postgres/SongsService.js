@@ -41,7 +41,7 @@ class SongsService {
     async getSongs(title, performer) {
         let baseQuery = 'SELECT * FROM songs';
         const values = [];
-        let conditions = [];
+        const conditions = [];
 
         if (title) {
             conditions.push(`title ILIKE $${conditions.length + 1}`);
@@ -59,7 +59,7 @@ class SongsService {
 
         const query = {
             text: baseQuery,
-            values: values,
+            values,
         };
 
         const songs = await this._pool.query(query);
@@ -73,11 +73,11 @@ class SongsService {
         };
         const song = await this._pool.query(query);
 
-        if (!song.rows.length) {
+        if (!song.rowCount) {
             throw new NotFoundError('Lagu tidak ditemukan');
         }
 
-        return song.rows.map(mapDBSongsToModelDetail)[0];
+        return mapDBSongsToModelDetail(song.rows[0]);
     }
 
     async editSongById(id, { title, year, performer, genre, duration }) {
