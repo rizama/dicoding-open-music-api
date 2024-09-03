@@ -22,9 +22,10 @@ const mapDBSongsToModelDetail = ({
     albumId,
 });
 
-const mapDBAlbumsToModel = ({ id, name, year, songs }) => ({
+const mapDBAlbumsToModel = ({ id, name, cover, year, songs }) => ({
     id,
     name,
+    coverUrl: cover,
     year,
     songs,
 });

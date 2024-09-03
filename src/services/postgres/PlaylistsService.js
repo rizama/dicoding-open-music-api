@@ -77,7 +77,6 @@ class PlaylistsService {
     async addSongToPlaylist(playlistId, songId) {
         const id = `ps-${nanoid(16)}`;
 
-        // verify song is exist
         await this._songsService.getSongById(songId);
 
         const query = {

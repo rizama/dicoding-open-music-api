@@ -48,7 +48,6 @@ class PlaylistHandler {
         };
     }
 
-    // tambah activities
     async postSongToPlaylistHandler(request, h) {
         this._validator.validateSongPayload(request.payload);
         const { songId } = request.payload;
@@ -62,7 +61,6 @@ class PlaylistHandler {
             message: 'Lagu berhasil ditambahkan ke playlist',
         });
 
-        // add activities
         await this._service.addActivity({
             playlistId,
             songId,
@@ -95,7 +93,6 @@ class PlaylistHandler {
         };
     }
 
-    // tambah activities
     async deleteSongFromPlaylistHandler(request) {
         const { playlistId } = request.params;
         const { songId } = request.payload;
@@ -104,7 +101,6 @@ class PlaylistHandler {
         await this._service.verifyPlaylistAccess(playlistId, credentialId);
         await this._service.deleteSongFromPlaylist(playlistId, songId);
 
-        // add activities
         await this._service.addActivity({
             playlistId,
             songId,

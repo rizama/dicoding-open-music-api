@@ -24,6 +24,42 @@ const routes = (handler) => [
         path: '/albums/{id}',
         handler: (request, h) => handler.deleteAlbumByIdHandler(request, h),
     },
+    {
+        method: 'POST',
+        path: '/albums/{id}/covers',
+        handler: (request, h) => handler.postCoverAlbumHandler(request, h),
+        options: {
+            payload: {
+                allow: 'multipart/form-data',
+                multipart: true,
+                output: 'stream',
+                maxBytes: 512000,
+            },
+        },
+    },
+    {
+        method: 'GET',
+        path: '/albums/{id}/likes',
+        handler: (request, h) =>
+            handler.getUserAlbumLikesByIdHandler(request, h),
+    },
+    {
+        method: 'POST',
+        path: '/albums/{id}/likes',
+        handler: (request, h) => handler.postUserAlbumLikesHandler(request, h),
+        options: {
+            auth: 'songsapp_jwt',
+        },
+    },
+    {
+        method: 'DELETE',
+        path: '/albums/{id}/likes',
+        handler: (request, h) =>
+            handler.deleteUserAlbumLikesHandler(request, h),
+        options: {
+            auth: 'songsapp_jwt',
+        },
+    },
 ];
 
 module.exports = routes;

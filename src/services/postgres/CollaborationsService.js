@@ -11,7 +11,6 @@ class CollaborationsService {
     async addCollaboration(playlistId, userId) {
         const id = `collab-${nanoid(16)}`;
 
-        // verify user
         await this._usersService.getUserById(userId);
 
         const query = {
