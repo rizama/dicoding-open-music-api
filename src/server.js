@@ -39,6 +39,7 @@ const ExportsValidator = require('./validator/exports');
 
 const ClientError = require('./exceptions/ClientError');
 const TokenManager = require('./tokenize/TokenManager');
+const config = require('./utils/config');
 
 const init = async () => {
     const storageService = new StorageService();
@@ -54,8 +55,8 @@ const init = async () => {
     );
 
     const server = Hapi.server({
-        port: process.env.PORT,
-        host: process.env.HOST,
+        port: config.app.port,
+        host: config.app.host,
         routes: {
             cors: {
                 origin: ['*'],
@@ -70,12 +71,12 @@ const init = async () => {
     ]);
 
     server.auth.strategy('songsapp_jwt', 'jwt', {
-        keys: process.env.ACCESS_TOKEN_KEY,
+        keys: config.jwt.accessTokenKey,
         verify: {
             aud: false,
             iss: false,
             sub: false,
-            maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+            maxAgeSec: config.jwt.accessTokenAge,
         },
         validate: (artifacts) => ({
             isValid: true,
