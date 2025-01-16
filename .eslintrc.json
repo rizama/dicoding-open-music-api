@@ -25,6 +25,8 @@
         "object-curly-spacing": "warn",
         "comma-dangle": "off",
         "object-curly-newline": "off",
-        "operator-linebreak": "off"
+        "operator-linebreak": "off",
+        "prefer-template": "off",
+        "implicit-arrow-linebreak": "off"
     }
 }

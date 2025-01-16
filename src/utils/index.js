@@ -1,23 +1,17 @@
-/* eslint-disable object-curly-newline */
-/* eslint-disable camelcase */
-
-const ClientError = require('../exceptions/ClientError');
-
-const mapDBToModel = ({ id, title, performer }) => ({
+const mapDBSongsToModel = ({ id, title, performer }) => ({
     id,
     title,
     performer,
 });
 
-const mapDBToModelDetail = ({
+const mapDBSongsToModelDetail = ({
     id,
     title,
     year,
     performer,
     genre,
     duration,
-    created_at,
-    updated_at,
+    album_id: albumId,
 }) => ({
     id,
     title,
@@ -25,29 +19,19 @@ const mapDBToModelDetail = ({
     performer,
     genre,
     duration,
-    insertedAt: created_at,
-    updatedAt: updated_at,
+    albumId,
 });
 
-const errorHandler = (error, h) => {
-    if (error instanceof ClientError) {
-        const response = h.response({
-            status: 'fail',
-            message: error.message,
-        });
-        response.code(error.statusCode);
-        return response;
-    }
+const mapDBAlbumsToModel = ({ id, name, cover, year, songs }) => ({
+    id,
+    name,
+    coverUrl: cover,
+    year,
+    songs,
+});
 
-    // Server ERROR!
-    const response = h.response({
-        status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
-    });
-    response.code(500);
-    console.error(error);
-
-    return response;
+module.exports = {
+    mapDBSongsToModel,
+    mapDBSongsToModelDetail,
+    mapDBAlbumsToModel,
 };
-
-module.exports = { mapDBToModel, mapDBToModelDetail, errorHandler };

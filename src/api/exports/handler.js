@@ -3,40 +3,33 @@ class ExportsHandler {
         this._service = service;
         this._validator = validator;
         this._playlistsService = playlistsService;
-
-        this.postExportPlaylistsHandler =
-            this.postExportPlaylistsHandler.bind(this);
     }
 
-    async postExportPlaylistsHandler(request, h) {
-        try {
-            this._validator.validateExportSongsPayload(request.payload);
+    async postExportPlaylistHandler(request, h) {
+        this._validator.validateExportPlaylistPayload(request.payload);
 
-            const { playlistId } = request.params;
-            const { id: userId } = request.auth.credentials;
+        const { playlistId } = request.params;
+        const { id: credentialId } = request.auth.credentials;
 
-            await this._playlistsService.verifyPlaylistAccess(playlistId, userId);
+        await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
 
-            const message = {
-                playlistId,
-                targetEmail: request.payload.targetEmail,
-            };
+        const message = {
+            playlistId,
+            targetEmail: request.payload.targetEmail,
+        };
 
-            await this._service.sendMessage(
-                'export:songs',
-                JSON.stringify(message)
-            );
+        await this._service.sendPlaylistMessage(
+            'export:playlist',
+            JSON.stringify(message)
+        );
 
-            const response = h.response({
-                status: 'success',
-                message: 'Permintaan Anda sedang kami proses',
-            });
+        const response = h.response({
+            status: 'success',
+            message: 'Permintaan Anda sedang kami proses',
+        });
 
-            response.code(201);
-            return response;
-        } catch (error) {
-            return error;
-        }
+        response.code(201);
+        return response;
     }
 }
 
